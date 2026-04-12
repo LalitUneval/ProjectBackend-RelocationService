@@ -1,0 +1,44 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: relocation-service
+
+  datasource:
+    url: jdbc:mysql://gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/test?sslMode=VERIFY_IDENTITY
+    username: 3utXacfbRoTt2ay.root
+    password: LbgcFSh3LDgvxXgY
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
+
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: false
+
+eureka:
+  client:
+    service-url:
+      defaultZone: https://projectbackend-serviceregistery-1.onrender.com/eureka/
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: false
+
+internal:
+  security:
+    key: Lalit-Super-Secret-Key-2026
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      user-service:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
