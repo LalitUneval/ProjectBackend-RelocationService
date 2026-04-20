@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -14,7 +16,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL) // if the some filed null then it will ignore this value
-public class AccommodationListingResponse {
+public class AccommodationListingResponse implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private Long id;
     private String title;
     private ListingType listingType;

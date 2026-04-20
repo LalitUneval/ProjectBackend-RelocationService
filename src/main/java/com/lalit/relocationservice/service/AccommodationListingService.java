@@ -10,6 +10,10 @@ import com.lalit.relocationservice.exception.UnauthorizedException;
 import com.lalit.relocationservice.repository.AccommodationListingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +35,13 @@ public class AccommodationListingService {
     private final AccommodationListingRepository accommodationListingRepository;
     private final UserProfileClient userClient;
 
+
+    @Caching(evict = {
+            @CacheEvict(value = "relocation_listings_city", allEntries = true),
+            @CacheEvict(value = "relocation_listings_latest", allEntries = true),
+            @CacheEvict(value = "relocation_listings_search", allEntries = true),
+            @CacheEvict(value = "relocation_listings_user", allEntries = true)
+    })
     public AccommodationListingResponse createListing(CreateListingRequest request) {
 
         AccommodationListing listing = AccommodationListing.builder()
@@ -64,6 +75,7 @@ public class AccommodationListingService {
     }
 
 
+    @Cacheable(value = "relocation_listing_id", key = "#listingId")
     @Transactional(readOnly = true)
     public AccommodationListingResponse getListing(Long listingId) {
 
@@ -78,6 +90,8 @@ public class AccommodationListingService {
         return mapToResponse(listing, userProfile);
     }
 
+
+    @Cacheable(value = "relocation_listings_city", key = "#city")
     @Transactional(readOnly = true)
     public List<AccommodationListingResponse> getListingsByCity(String city) {
 
@@ -182,6 +196,7 @@ public class AccommodationListingService {
     }
 
 
+    @Cacheable(value = "relocation_listings_user", key = "#userId")
     @Transactional(readOnly = true)
     public List<AccommodationListingResponse> getUserListings(Long userId) {
 
@@ -208,6 +223,7 @@ public class AccommodationListingService {
                 .toList();
     }
 
+    @Cacheable(value = "relocation_listings_latest", key = "'latest'")
     @Transactional(readOnly = true)
     public List<AccommodationListingResponse> getLatestListings() {
 
@@ -242,6 +258,14 @@ public class AccommodationListingService {
                 .toList();
     }
 
+    @Caching(
+            put = { @CachePut(value = "relocation_listing_id", key = "#listingId") },
+            evict = {
+                    @CacheEvict(value = "relocation_listings_city", allEntries = true),
+                    @CacheEvict(value = "relocation_listings_latest", allEntries = true),
+                    @CacheEvict(value = "relocation_listings_user", allEntries = true)
+            }
+    )
     public AccommodationListingResponse updateListing(
             Long listingId,
             UpdateListingRequest request,
@@ -297,6 +321,12 @@ public class AccommodationListingService {
         accommodationListingRepository.save(listing);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "relocation_listing_id", key = "#listingId"),
+            @CacheEvict(value = "relocation_listings_city", allEntries = true),
+            @CacheEvict(value = "relocation_listings_latest", allEntries = true),
+            @CacheEvict(value = "relocation_listings_user", allEntries = true)
+    })
     public void deleteListing(Long listingId, Long userId) {
         AccommodationListing listing = accommodationListingRepository.findById(listingId)
                 .orElseThrow(() -> new ListingNotFoundException("Listing not found: " + listingId));

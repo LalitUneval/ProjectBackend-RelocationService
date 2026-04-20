@@ -5,6 +5,13 @@ spring:
   application:
     name: relocation-service
 
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+  cache:
+    redis:
+      time-to-live: 600000
+
   datasource:
     url: jdbc:mysql://gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/test?sslMode=VERIFY_IDENTITY
     username: 3utXacfbRoTt2ay.root
@@ -16,6 +23,14 @@ spring:
       ddl-auto: update
     show-sql: true
     database-platform: org.hibernate.dialect.MySQLDialect
+
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:red-d7h0pvl7vvec73aktth0}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password:
+      ssl:
+        enabled: false
 
   cloud:
     openfeign:

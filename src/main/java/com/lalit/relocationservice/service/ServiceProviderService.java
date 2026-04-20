@@ -10,6 +10,9 @@ import com.lalit.relocationservice.exception.ProviderNotFoundException;
 import com.lalit.relocationservice.exception.ResourceNotFoundException;
 import com.lalit.relocationservice.repository.ServiceProviderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +30,18 @@ public class ServiceProviderService {
     /**
      * Create service provider (Admin only)
      */
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "relocation_providers_all",allEntries = true),
+                    @CacheEvict(value = "relocation_providers_city",allEntries = true),
+                    @CacheEvict(value = "relocation_providers_type",allEntries = true),
+                    @CacheEvict(value = "relocation_providers_city_type",allEntries = true),
+                    @CacheEvict(value = "relocation_providers_verified",allEntries = true),
+                    @CacheEvict(value = "relocation_providers_toprated",allEntries = true),
+                    @CacheEvict(value = "relocation_providers_search",allEntries = true)
+
+            }
+    )
     public ServiceProviderResponse createProvider(CreateServiceProviderRequest request) {
         ServiceProvider provider = ServiceProvider.builder()
                 .name(request.getName())
@@ -58,6 +73,7 @@ public class ServiceProviderService {
     /**
      * Get all providers
      */
+    @Cacheable(value = "relocation_providers_all",key = "'all'")
     public List<ServiceProviderResponse> getAllProviders() {
         List<ServiceProvider> providers = serviceProviderRepository.findAll();
         return providers.stream()
@@ -68,6 +84,7 @@ public class ServiceProviderService {
     /**
      * Get providers by city
      */
+    @Cacheable(value = "relocation_providers_city",key = "#city")
     public List<ServiceProviderResponse> getProvidersByCity(String city) {
         List<ServiceProvider> providers = serviceProviderRepository.findByCity(city);
 
@@ -83,6 +100,7 @@ public class ServiceProviderService {
     /**
      * Get providers by service type
      */
+    @Cacheable(value = "relocation_providers_type", key = "#serviceType")
     public List<ServiceProviderResponse> getProvidersByServiceType(ServiceType serviceType) {
         List<ServiceProvider> providers = serviceProviderRepository.findByServiceType(serviceType);
 
@@ -98,6 +116,7 @@ public class ServiceProviderService {
     /**
      * Get providers by city and service type
      */
+    @Cacheable(value = "relocation_providers_city_type", key = "#city + '-' + #serviceType")
     public List<ServiceProviderResponse> getProvidersByCityAndType(String city, ServiceType serviceType) {
         List<ServiceProvider> providers = serviceProviderRepository.findByCityAndServiceType(city, serviceType);
 
@@ -113,6 +132,7 @@ public class ServiceProviderService {
     /**
      * Get verified providers
      */
+    @Cacheable(value = "relocation_providers_verified", key = "'verified'")
     public List<ServiceProviderResponse> getVerifiedProviders() {
         List<ServiceProvider> providers = serviceProviderRepository.findByIsVerified(true);
         return providers.stream()
@@ -123,6 +143,7 @@ public class ServiceProviderService {
     /**
      * Get top-rated providers
      */
+    @Cacheable(value = "relocation_providers_toprated", key = "#minRating")
     public List<ServiceProviderResponse> getTopRatedProviders(Double minRating) {
         List<ServiceProvider> providers = serviceProviderRepository.findTopRatedProviders(minRating);
         if(providers.isEmpty()){
@@ -136,6 +157,7 @@ public class ServiceProviderService {
     /**
      * Search providers
      */
+    @Cacheable(value = "relocation_providers_search", key = "#request.city + '-' + #request.serviceType + '-' + #request.minRating")
     public List<ServiceProviderResponse> searchProviders(ServiceProviderSearchRequest request) {
         List<ServiceProvider> providers = serviceProviderRepository.searchProviders(
                 request.getCity(),
@@ -154,6 +176,14 @@ public class ServiceProviderService {
     /**
      * Update provider (Admin only)
      */
+    @Caching(evict = {
+            @CacheEvict(value = "relocation_providers_all", allEntries = true),
+            @CacheEvict(value = "relocation_providers_city", allEntries = true),
+            @CacheEvict(value = "relocation_providers_type", allEntries = true),
+            @CacheEvict(value = "relocation_providers_verified", allEntries = true),
+            @CacheEvict(value = "relocation_providers_toprated", allEntries = true),
+            @CacheEvict(value = "relocation_providers_search", allEntries = true)
+    })
     public ServiceProviderResponse updateProvider(Long providerId, UpdateServiceProviderRequest request) {
         ServiceProvider provider = serviceProviderRepository.findById(providerId)
                 .orElseThrow(() -> new ProviderNotFoundException("Provider not found: " + providerId));
