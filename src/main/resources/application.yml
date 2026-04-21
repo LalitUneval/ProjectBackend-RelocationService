@@ -5,9 +5,7 @@ spring:
   application:
     name: relocation-service
 
-  jackson:
-    serialization:
-      write-dates-as-timestamps: false
+
   cache:
     redis:
       time-to-live: 600000
@@ -26,11 +24,12 @@ spring:
 
   data:
     redis:
-      host: ${SPRING_DATA_REDIS_HOST:red-d7h0pvl7vvec73aktth0}
+      host: ${SPRING_DATA_REDIS_HOST:quick-antelope-92541.upstash.io}
       port: ${SPRING_DATA_REDIS_PORT:6379}
-      password:
+      username: ${SPRING_DATA_REDIS_USERNAME:default}
+      password: ${SPRING_DATA_REDIS_PASSWORD:gQAAAAAAAWl9AAIncDJmYzgwMzZkY2RhMTY0ZmE4YjJlZjBiODdlNTE4ZjMwZHAyOTI1NDE}
       ssl:
-        enabled: false
+        enabled: ${SPRING_DATA_REDIS_SSL_ENABLED:true}
 
   cloud:
     openfeign:
